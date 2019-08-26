@@ -223,6 +223,27 @@ class Board(TrelloBase):
 				post_args=arguments, )
 		return List.from_json(board=self, json_obj=obj)
 
+	def add_custom_field_definition(self, name, field_type, list_options=None, pos=None):
+		"""Add a custom field to this board
+
+		:name: name of the custom field
+		:field_type:
+		:list_options:
+		:pos: position of the list: "bottom", "top" or a positive number
+
+		:return: the new custom field definition
+		"""
+		args = {'idModel': self.id, 'modelType': 'board', 'name': name,'type': field_type}
+		if pos:
+			args['pos'] = pos
+		if list_options:
+			args['options'] = list_options
+		json_obj = self.client.fetch_json(
+			'/customFields',
+			http_method='POST',
+			post_args=args)
+		return CustomFieldDefinition.from_json(self, json_obj)
+
 	def add_label(self, name, color):
 		"""Add a label to this board
 
@@ -404,6 +425,17 @@ class Board(TrelloBase):
 				'/boards/{0}/members/{1}'.format(self.id, member.id),
 				http_method='DELETE',
 				post_args={'idMember': member.id},
+		)
+		return json_obj
+
+	def remove_custom_field_definition(self, custom_field_definition):
+		"""Remove a custom field.
+
+		:custom_field_definition: a CustomFieldDefinition object
+		"""
+		json_obj = self.client.fetch_json(
+				'/customFields/{}'.format(custom_field_definition.id),
+				http_method='DELETE',
 		)
 		return json_obj
 
